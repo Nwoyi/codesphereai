@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
   MessageSquare, 
-  ShoppingCart, 
+  Calendar, 
   BarChart3, 
   Settings,
   LogOut,
@@ -21,7 +21,7 @@ interface SidebarNavProps {
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'conversations', label: 'Conversations', icon: MessageSquare },
-  { id: 'orders', label: 'Orders', icon: ShoppingCart },
+  { id: 'viewings', label: 'Viewings', icon: Calendar },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
@@ -60,12 +60,12 @@ export function SidebarNav({ currentPage, onNavigate }: SidebarNavProps) {
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-lg shrink-0">
-              M
+              R
             </div>
             {!collapsed && (
               <div className="animate-fade-in overflow-hidden">
                 <h1 className="font-semibold text-sidebar-primary-foreground truncate">
-                  {mockTenant.name}
+                  {mockTenant.businessName}
                 </h1>
                 <p className="text-xs text-sidebar-muted truncate">{mockTenant.location}</p>
               </div>

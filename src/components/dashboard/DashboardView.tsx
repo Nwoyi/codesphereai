@@ -1,27 +1,27 @@
 import { MetricCard } from "./MetricCard";
 import { RecentActivity } from "./RecentActivity";
-import { RevenueChart } from "./RevenueChart";
-import { TopProducts } from "./TopProducts";
+import { InquiryChart } from "./InquiryChart";
+import { TopProperties } from "./TopProperties";
 import { PageHeader } from "../layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Download } from "lucide-react";
 import { 
   MessageSquare, 
-  ShoppingCart, 
-  CheckCircle2, 
-  DollarSign,
+  Calendar, 
+  Clock, 
+  Zap,
   TrendingUp,
-  Users
+  Moon
 } from "lucide-react";
-import { mockMetrics, mockConversations, mockOrders } from "@/data/mockData";
-import { formatCurrency } from "@/lib/formatters";
+import { mockMetrics, mockConversations, mockViewings } from "@/data/mockData";
+import { formatPercentage, formatResponseTime } from "@/lib/formatters";
 
 export function DashboardView() {
   return (
     <div className="animate-fade-in">
       <PageHeader
         title="Dashboard"
-        description="Welcome back! Here's what's happening today."
+        description="Welcome back! Here's your property inquiry overview."
         actions={
           <>
             <Button variant="outline" size="sm" className="gap-2">
@@ -39,33 +39,33 @@ export function DashboardView() {
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <MetricCard
-          title="Conversations Today"
-          value={mockMetrics.conversationsToday}
-          trend={mockMetrics.conversationsTrend}
+          title="Inquiries Today"
+          value={mockMetrics.inquiriesToday}
+          trend={mockMetrics.inquiriesTrend}
           trendLabel="vs yesterday"
           icon={MessageSquare}
           iconColor="text-info"
         />
         <MetricCard
-          title="Active Orders"
-          value={mockMetrics.activeOrders}
-          icon={ShoppingCart}
+          title="Active Conversations"
+          value={mockMetrics.activeConversations}
+          icon={MessageSquare}
           iconColor="text-warning"
         />
         <MetricCard
-          title="Completed Orders"
-          value={mockMetrics.completedOrders}
-          trend={mockMetrics.ordersTrend}
+          title="Viewings Scheduled"
+          value={mockMetrics.viewingsScheduled}
+          trend={mockMetrics.viewingsTrend}
           trendLabel="this week"
-          icon={CheckCircle2}
+          icon={Calendar}
           iconColor="text-success"
         />
         <MetricCard
-          title="Revenue Today"
-          value={formatCurrency(mockMetrics.revenueToday)}
-          trend={mockMetrics.revenueTrend}
-          trendLabel="vs yesterday"
-          icon={DollarSign}
+          title="Avg Response Time"
+          value={formatResponseTime(mockMetrics.avgResponseTime)}
+          trend={mockMetrics.responseTimeTrend}
+          trendLabel="faster"
+          icon={Zap}
           iconColor="text-primary"
         />
       </div>
@@ -73,36 +73,36 @@ export function DashboardView() {
       {/* Secondary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <MetricCard
-          title="Weekly Revenue"
-          value={formatCurrency(mockMetrics.revenueThisWeek)}
-          icon={TrendingUp}
+          title="Response Rate"
+          value={formatPercentage(mockMetrics.responseRate)}
+          icon={Clock}
           iconColor="text-chart-1"
         />
         <MetricCard
-          title="Monthly Revenue"
-          value={formatCurrency(mockMetrics.revenueThisMonth)}
+          title="Conversion Rate"
+          value={formatPercentage(mockMetrics.conversionRate)}
           icon={TrendingUp}
           iconColor="text-chart-2"
         />
         <MetricCard
-          title="Avg. Order Value"
-          value={formatCurrency(mockMetrics.averageOrderValue)}
-          icon={Users}
+          title="After-Hours Inquiries"
+          value={mockMetrics.afterHoursInquiries}
+          icon={Moon}
           iconColor="text-chart-3"
         />
       </div>
 
       {/* Charts and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <RevenueChart className="lg:col-span-2" />
-        <TopProducts />
+        <InquiryChart className="lg:col-span-2" />
+        <TopProperties />
       </div>
 
       {/* Recent Activity */}
       <div className="mt-6">
         <RecentActivity
           conversations={mockConversations}
-          orders={mockOrders}
+          viewings={mockViewings}
         />
       </div>
     </div>
