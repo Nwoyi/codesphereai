@@ -17,9 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Download, Eye, Phone, Clock, MessageSquare } from "lucide-react";
+import { Search, Download, Eye, Phone, Clock, MessageSquare, Zap, Bot, User } from "lucide-react";
 import { mockConversations, mockMessages } from "@/data/mockData";
-import { formatDateTime, formatRelativeTime, getStatusColor } from "@/lib/formatters";
+import { formatDateTime, formatRelativeTime, formatResponseTime, getStatusColor } from "@/lib/formatters";
 import type { Conversation, Message } from "@/types";
 
 export function ConversationsView() {
@@ -29,8 +29,9 @@ export function ConversationsView() {
 
   const filteredConversations = mockConversations.filter((conv) => {
     const matchesSearch =
-      conv.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.customerPhone.includes(searchQuery);
+      conv.guestName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conv.guestPhone.includes(searchQuery) ||
+      (conv.propertyInterestedName?.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === "all" || conv.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -39,11 +40,15 @@ export function ConversationsView() {
     ? mockMessages[selectedConversation.id] || []
     : [];
 
+  const formatStatus = (status: string): string => {
+    return status.replace(/_/g, ' ');
+  };
+
   return (
     <div className="animate-fade-in">
       <PageHeader
         title="Conversations"
-        description="View and manage WhatsApp bot conversations"
+        description="View and manage WhatsApp bot conversations with guests"
         actions={
           <Button variant="outline" size="sm" className="gap-2">
             <Download className="w-4 h-4" />
@@ -57,21 +62,22 @@ export function ConversationsView() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name or phone..."
+            placeholder="Search by guest name, phone, or property..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[160px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="abandoned">Abandoned</SelectItem>
+            <SelectItem value="viewing_booked">Viewing Booked</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
+            <SelectItem value="no_response">No Response</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -82,11 +88,11 @@ export function ConversationsView() {
           <table className="w-full">
             <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Customer</th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">Phone</th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden md:table-cell">Started</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Guest</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden md:table-cell">Property</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">Response</th>
                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">Messages</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">Handler</th>
                 <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -100,21 +106,25 @@ export function ConversationsView() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                        {conv.customerName.charAt(0)}
+                        {conv.guestName.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{conv.customerName}</p>
-                        <p className="text-xs text-muted-foreground sm:hidden">{conv.customerPhone}</p>
+                        <p className="font-medium text-foreground">{conv.guestName}</p>
+                        <p className="text-xs text-muted-foreground">{conv.guestPhone}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
-                    {conv.customerPhone}
-                  </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <div className="text-sm">
-                      <p className="text-foreground">{formatRelativeTime(conv.startedAt)}</p>
-                      <p className="text-xs text-muted-foreground">{formatDateTime(conv.startedAt)}</p>
+                    <p className="text-sm text-foreground truncate max-w-[200px]">
+                      {conv.propertyInterestedName || 'General inquiry'}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Zap className="w-3.5 h-3.5 text-success" />
+                      <span className="text-success font-medium">
+                        {conv.responseTimeSeconds ? formatResponseTime(conv.responseTimeSeconds) : '-'}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -123,18 +133,27 @@ export function ConversationsView() {
                       className={cn(
                         "capitalize",
                         getStatusColor(conv.status) === 'success' && "bg-success/10 text-success",
-                        getStatusColor(conv.status) === 'warning' && "bg-warning/10 text-warning",
-                        getStatusColor(conv.status) === 'destructive' && "bg-destructive/10 text-destructive",
                         getStatusColor(conv.status) === 'info' && "bg-info/10 text-info",
+                        getStatusColor(conv.status) === 'destructive' && "bg-destructive/10 text-destructive",
+                        getStatusColor(conv.status) === 'secondary' && "bg-muted text-muted-foreground",
                       )}
                     >
-                      {conv.status}
+                      {formatStatus(conv.status)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
-                    <div className="flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4" />
-                      {conv.messageCount || 0}
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      {conv.botHandled ? (
+                        <>
+                          <Bot className="w-4 h-4" />
+                          <span>Bot</span>
+                        </>
+                      ) : (
+                        <>
+                          <User className="w-4 h-4" />
+                          <span>Manual</span>
+                        </>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -169,13 +188,13 @@ export function ConversationsView() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                {selectedConversation?.customerName.charAt(0)}
+                {selectedConversation?.guestName.charAt(0)}
               </div>
               <div>
-                <p className="font-semibold">{selectedConversation?.customerName}</p>
+                <p className="font-semibold">{selectedConversation?.guestName}</p>
                 <p className="text-sm text-muted-foreground font-normal flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5" />
-                  {selectedConversation?.customerPhone}
+                  {selectedConversation?.guestPhone}
                 </p>
               </div>
             </DialogTitle>
@@ -184,8 +203,14 @@ export function ConversationsView() {
           <div className="flex items-center gap-4 text-sm text-muted-foreground border-b border-border pb-3">
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />
-              {selectedConversation && formatDateTime(selectedConversation.startedAt)}
+              {selectedConversation && formatDateTime(selectedConversation.firstMessageAt)}
             </span>
+            {selectedConversation?.responseTimeSeconds && (
+              <span className="flex items-center gap-1.5 text-success">
+                <Zap className="w-4 h-4" />
+                {formatResponseTime(selectedConversation.responseTimeSeconds)} response
+              </span>
+            )}
             <Badge
               variant="secondary"
               className={cn(
@@ -196,9 +221,16 @@ export function ConversationsView() {
                   getStatusColor(selectedConversation.status) === 'info' && "bg-info/10 text-info",
               )}
             >
-              {selectedConversation?.status}
+              {selectedConversation && formatStatus(selectedConversation.status)}
             </Badge>
           </div>
+
+          {selectedConversation?.propertyInterestedName && (
+            <div className="bg-muted/50 rounded-lg px-3 py-2 text-sm">
+              <span className="text-muted-foreground">Property:</span>{' '}
+              <span className="font-medium text-foreground">{selectedConversation.propertyInterestedName}</span>
+            </div>
+          )}
 
           <div className="flex-1 overflow-y-auto space-y-3 py-4 scrollbar-thin">
             {conversationMessages.map((msg, index) => (
@@ -206,14 +238,14 @@ export function ConversationsView() {
                 key={msg.id}
                 className={cn(
                   "flex animate-slide-up",
-                  msg.sender === 'customer' ? "justify-start" : "justify-end"
+                  msg.sender === 'guest' ? "justify-start" : "justify-end"
                 )}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div
                   className={cn(
                     "max-w-[80%] rounded-2xl px-4 py-2.5",
-                    msg.sender === 'customer'
+                    msg.sender === 'guest'
                       ? "bg-muted text-foreground rounded-bl-md"
                       : "bg-primary text-primary-foreground rounded-br-md"
                   )}
@@ -222,7 +254,7 @@ export function ConversationsView() {
                   <p
                     className={cn(
                       "text-xs mt-1",
-                      msg.sender === 'customer' ? "text-muted-foreground" : "text-primary-foreground/70"
+                      msg.sender === 'guest' ? "text-muted-foreground" : "text-primary-foreground/70"
                     )}
                   >
                     {formatDateTime(msg.timestamp)}

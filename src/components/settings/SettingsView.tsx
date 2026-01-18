@@ -11,13 +11,13 @@ import { toast } from "@/hooks/use-toast";
 
 export function SettingsView() {
   const [settings, setSettings] = useState({
-    businessName: mockTenant.name,
+    businessName: mockTenant.businessName,
     phone: mockTenant.phone,
     location: mockTenant.location,
     email: mockUser.email,
     notifications: {
-      newOrders: true,
-      paymentConfirmations: true,
+      newInquiries: true,
+      viewingReminders: true,
       dailyReports: false,
       weeklyReports: true,
     },
@@ -52,7 +52,7 @@ export function SettingsView() {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Business Information</h3>
-              <p className="text-sm text-muted-foreground">Your store details</p>
+              <p className="text-sm text-muted-foreground">Your property management details</p>
             </div>
           </div>
 
@@ -112,15 +112,15 @@ export function SettingsView() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-foreground">New Order Alerts</p>
-                <p className="text-sm text-muted-foreground">Get notified when new orders arrive</p>
+                <p className="font-medium text-foreground">New Inquiry Alerts</p>
+                <p className="text-sm text-muted-foreground">Get notified when guests send inquiries</p>
               </div>
               <Switch
-                checked={settings.notifications.newOrders}
+                checked={settings.notifications.newInquiries}
                 onCheckedChange={(checked) =>
                   setSettings({
                     ...settings,
-                    notifications: { ...settings.notifications, newOrders: checked },
+                    notifications: { ...settings.notifications, newInquiries: checked },
                   })
                 }
               />
@@ -128,15 +128,15 @@ export function SettingsView() {
             <Separator />
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-foreground">Payment Confirmations</p>
-                <p className="text-sm text-muted-foreground">Alert when payments are confirmed</p>
+                <p className="font-medium text-foreground">Viewing Reminders</p>
+                <p className="text-sm text-muted-foreground">Reminders before scheduled viewings</p>
               </div>
               <Switch
-                checked={settings.notifications.paymentConfirmations}
+                checked={settings.notifications.viewingReminders}
                 onCheckedChange={(checked) =>
                   setSettings({
                     ...settings,
-                    notifications: { ...settings.notifications, paymentConfirmations: checked },
+                    notifications: { ...settings.notifications, viewingReminders: checked },
                   })
                 }
               />
@@ -145,7 +145,7 @@ export function SettingsView() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-foreground">Daily Reports</p>
-                <p className="text-sm text-muted-foreground">Receive daily sales summary</p>
+                <p className="text-sm text-muted-foreground">Receive daily inquiry summary</p>
               </div>
               <Switch
                 checked={settings.notifications.dailyReports}
@@ -224,7 +224,7 @@ export function SettingsView() {
               <Label>Business Logo</Label>
               <div className="mt-1.5 flex items-center gap-4">
                 <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                  M
+                  R
                 </div>
                 <Button variant="outline">Upload Logo</Button>
               </div>

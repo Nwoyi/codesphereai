@@ -77,24 +77,78 @@ export function formatTrend(value: number): string {
   return `${sign}${value.toFixed(1)}%`;
 }
 
+export function formatResponseTime(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds}s`;
+  } else if (seconds < 3600) {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
+  } else {
+    const hours = Math.floor(seconds / 3600);
+    return `${hours}h`;
+  }
+}
+
+export function formatPercentage(value: number): string {
+  return `${value.toFixed(1)}%`;
+}
+
 export function getStatusColor(status: string): string {
   switch (status.toLowerCase()) {
     case 'active':
-    case 'confirmed':
+    case 'scheduled':
+    case 'available':
       return 'success';
-    case 'pending':
-      return 'warning';
+    case 'viewing_booked':
     case 'completed':
       return 'info';
-    case 'abandoned':
-    case 'failed':
+    case 'closed':
+    case 'occupied':
+      return 'secondary';
+    case 'no_response':
+    case 'no_show':
+    case 'cancelled':
+    case 'maintenance':
       return 'destructive';
     default:
       return 'secondary';
   }
 }
 
+export function getSourceIcon(source: string): string {
+  switch (source.toLowerCase()) {
+    case 'instagram':
+      return '📸';
+    case 'google':
+      return '🔍';
+    case 'whatsapp':
+    case 'direct':
+      return '💬';
+    case 'referral':
+      return '👥';
+    default:
+      return '🌐';
+  }
+}
+
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
+}
+
+export function formatViewingDate(date: string, time: string): string {
+  const dateObj = new Date(date);
+  const formattedDate = new Intl.DateTimeFormat('en-NG', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(dateObj);
+  
+  // Parse time (HH:MM format)
+  const [hours, minutes] = time.split(':');
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+  
+  return `${formattedDate} at ${hour12}:${minutes} ${ampm}`;
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import { ConversationsView } from "@/components/conversations/ConversationsView";
-import { OrdersView } from "@/components/orders/OrdersView";
+import { ViewingsView } from "@/components/viewings/ViewingsView";
 import { AnalyticsView } from "@/components/analytics/AnalyticsView";
 import { SettingsView } from "@/components/settings/SettingsView";
 
@@ -15,8 +15,8 @@ export default function Dashboard() {
         return <DashboardView />;
       case "conversations":
         return <ConversationsView />;
-      case "orders":
-        return <OrdersView />;
+      case "viewings":
+        return <ViewingsView />;
       case "analytics":
         return <AnalyticsView />;
       case "settings":

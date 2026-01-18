@@ -1,12 +1,14 @@
-// Multi-tenant types for Marmen Groceries Dashboard
+// Multi-tenant types for Short-Let Property Management Dashboard
 
 export type UserRole = 'admin' | 'owner' | 'staff';
-export type ConversationStatus = 'active' | 'completed' | 'abandoned';
-export type PaymentStatus = 'pending' | 'confirmed' | 'failed';
+export type ConversationStatus = 'active' | 'viewing_booked' | 'closed' | 'no_response';
+export type ViewingStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
+export type PropertyStatus = 'available' | 'occupied' | 'maintenance';
+export type LeadSource = 'google' | 'instagram' | 'direct' | 'referral' | 'whatsapp';
 
 export interface Tenant {
   id: string;
-  name: string;
+  businessName: string;
   slug: string;
   phone: string;
   location: string;
@@ -23,65 +25,92 @@ export interface User {
   createdAt: string;
 }
 
+export interface Property {
+  id: string;
+  tenantId: string;
+  name: string;
+  location: string;
+  propertyUrl?: string;
+  bedrooms: number;
+  pricePerNight: number;
+  status: PropertyStatus;
+  imageUrl?: string;
+  createdAt: string;
+}
+
 export interface Conversation {
   id: string;
   tenantId: string;
-  customerName: string;
-  customerPhone: string;
+  guestName: string;
+  guestPhone: string;
+  propertyInterestedId?: string;
+  propertyInterestedName?: string;
   status: ConversationStatus;
-  startedAt: string;
+  firstMessageAt: string;
   lastMessageAt: string;
+  responseTimeSeconds?: number;
+  botHandled: boolean;
   messageCount?: number;
 }
 
 export interface Message {
   id: string;
   conversationId: string;
-  sender: 'customer' | 'bot';
+  sender: 'guest' | 'bot' | 'staff';
   messageText: string;
   timestamp: string;
 }
 
-export interface OrderItem {
-  product: string;
-  quantity: number;
-  price: number;
-}
-
-export interface Order {
+export interface Viewing {
   id: string;
   tenantId: string;
   conversationId?: string;
-  customerName: string;
-  customerPhone: string;
-  items: OrderItem[];
-  totalAmount: number;
-  paymentStatus: PaymentStatus;
-  paymentScreenshotUrl?: string;
+  guestName: string;
+  guestPhone: string;
+  propertyId: string;
+  propertyName: string;
+  viewingDate: string;
+  viewingTime: string;
+  status: ViewingStatus;
+  source: LeadSource;
+  notes?: string;
   createdAt: string;
-  updatedAt: string;
 }
 
-export interface Product {
+export interface BotMetrics {
   id: string;
   tenantId: string;
-  name: string;
-  price: number;
-  stockQuantity: number;
-  createdAt: string;
+  date: string;
+  totalInquiries: number;
+  botResponses: number;
+  manualResponses: number;
+  avgResponseTime: number;
+  afterHoursInquiries: number;
+  viewingsBooked: number;
 }
 
 export interface DashboardMetrics {
-  conversationsToday: number;
-  activeOrders: number;
-  completedOrders: number;
-  revenueToday: number;
-  revenueThisWeek: number;
-  revenueThisMonth: number;
-  averageOrderValue: number;
-  conversationsTrend: number;
-  ordersTrend: number;
-  revenueTrend: number;
+  inquiriesToday: number;
+  activeConversations: number;
+  viewingsScheduled: number;
+  responseRate: number;
+  avgResponseTime: number;
+  conversionRate: number;
+  inquiriesThisWeek: number;
+  inquiriesThisMonth: number;
+  afterHoursInquiries: number;
+  inquiriesTrend: number;
+  viewingsTrend: number;
+  responseTimeTrend: number;
+}
+
+export interface PropertyInterest {
+  propertyId: string;
+  propertyName: string;
+  location: string;
+  inquiries: number;
+  viewingsBooked: number;
+  conversionRate: number;
 }
 
 export interface AuthState {
